@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="spinner" data-spinner="spinner">
+    <div id="wheelSpinner">
         <p>Test 1</p>
         <p>Test 2</p>
         <p>Test 3</p>
@@ -20,61 +20,113 @@
         <p>Test 10</p>
     </div>
     <script>
-        let spinner = document.querySelector('[data-spinner]');
-        
-        let content = spinner.children;
-
-        let value = [];
-
         let color = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlueViolet', 'HotPink', 'DeepPink']
-        
 
-        spinner.style.position = 'relative';
-        spinner.style.borderRadius = '50%';
-        spinner.style.overflow = 'hidden';
-        spinner.style.border = '1px solid red';
-        spinner.style.height = '500px';
-        spinner.style.width = '500px';
+        class WheelSpinner{
+            id = null;
+            options = null;
 
-        if (content.length > 0) {
-            let contentTotal = content.length;
+            contentTotal = null;
 
-            for (let i = 0; i < contentTotal; i++) {
-                value.push(content[i]);
+            constructor(id, options) {
+                if (id == null) return console.error("[WheelSpinner.js] missing 'id' parameter.");
+                if (options == null) return console.error("[WheelSpinner.js] missing 'options' parameter.");
+
+                this.id = id;
+                this.options = options;
+
+                this.validation();
+                this.injectStyle();
+                this.drawContent();
             }
 
-            spinner.innerHTML = '';
+            validation() {
+                if (this.options['size'] == null) return console.error("[WheelSpinner.js] 'options' parameter missing 'size' property.");
+            }
 
-            for (let i = 0; i < contentTotal; i++) {
-                var el = document.createElement("div");
-                el.style.height = `${(500/2)}px`;
-                el.style.width = '500px';
-                el.style.position = 'absolute';
-                el.style.display = 'flex';
-                el.style.justifyContent = 'center';
-                el.style.alignItems = 'center';
-                el.style.top = '0px';
-                el.style.left = '0px';
-                var height = 250;
-                var width = 500;
+            injectStyle() {
+                let head = document.getElementsByTagName('head')[0];
+                let style = document.createElement('style');
 
-                var degrees = 360/contentTotal;
-                var tangent = Math.tan((degrees /2) * Math.PI / 180)
+                style.innerHTML = ` #${this.id} {
+                                        border: 1px solid blue;
+                                        border-radius: 50%;
+                                        overflow: hidden;
+                                        position: relative;
+                                        height: ${this.options['size']}px;
+                                        width: ${this.options['size']}px;
+                                    }
 
-                var base = (2 * height) * tangent;
-                var length = (width - base) / 10;
-                el.style.clipPath = `polygon(50% 100%, ${100 - length}% 0, ${(length)}% 0)`; 
-                el.style.transform = `rotate(${(360/contentTotal) * (i+1)}deg)`;
-                el.style.transformOrigin = `50% 100%`;
-                el.style.backgroundColor = color[i];
-                el.appendChild(value[i]);
-                var child = el.firstChild;
-                child.style.transform = `translateY(-50px) rotate(${360 - ((360/contentTotal) * (i+1))}deg) `;
-                spinner.appendChild(el);
+                                    #${this.id} * {
+                                        display: flex;
+                                        justify-content: center;
+                                        align-items: center;
+                                        position: absolute;
+                                        top: 0px;
+                                        left: 0px;
+                                        height: ${this.options['size']/2}px;
+                                        width: ${this.options['size']}px;
+                                    }
+                                    
+                                    `;
+                head.appendChild(style);
+            }
+
+            drawContent() {
+                let element = document.getElementById(this.id);
+                let contentElements = [].slice.call(element.children);
+
+                this.contentTotal = contentElements.length;
+
+                if (this.contentTotal < 1) return;
+
+                element.innerHTML = '';
+                for (let i = 0; i < this.contentTotal; i++) {
+                    let content = document.createElement("div");
+
+                    var degrees = 360/this.contentTotal;
+                    var tangent = Math.tan((degrees /2) * Math.PI / 180)
+                    var base = (2 * (this.options['size']/2)) * tangent;
+                    var length = (this.options['size'] - base) / 10;
+
+                    let head = document.getElementsByTagName('head')[0];
+                    let style = document.createElement('style');
+
+                    style.innerHTML = ` #${this.id}>:nth-child(${i+1}) {
+                                            clip-path: polygon(50% 100%, ${100 - length}% 0, ${(length)}% 0);
+                                            transform: rotate(${(360/this.contentTotal) * (i+1)}deg);
+                                            transform-origin: 50% 100%;
+                                            background-color: ${color[i]};
+                                        }
+                                        `;
+                    head.appendChild(style);
+                    content.appendChild(contentElements[i]);
+                    content.firstChild.style.transform = `translateY(-50px) rotate(${360 - ((360/this.contentTotal) * (i+1))}deg) `;
+                    element.appendChild(content);
+                }
+
+            }
+
+            spin(value) {
             }
         }
 
+        let options = {
+            audio: false,
+            background: {
+                color: null,
+                image: null,
+            },
+            border: {
+                color: null,
+                size: 2,
+            },
+            size: 500,
+        }
 
+        let wheelSpinner = new WheelSpinner('wheelSpinner', options);
+
+        wheelSpinner.spin();
     </script>
 </body>
 </html>
