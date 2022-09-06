@@ -8,17 +8,19 @@
 </head>
 <body>
     <div id="wheelSpinner">
-        <p>Test 1</p>
-        <p>Test 2</p>
-        <p>Test 3</p>
-        <p>Test 4</p>
-        <p>Test 5</p>
-        <p>Test 6</p>
-        <p>Test 7</p>
-        <p>Test 8</p>
-        <p>Test 9</p>
-        <p>Test 10</p>
+        <p data-value="1">Test 1</p>
+        <p data-value="2">Test 2</p>
+        <p data-value="3">Test 3</p>
+        <p data-value="4">Test 4</p>
+        <p data-value="5">Test 5</p>
+        <p data-value="6">Test 6</p>
+        <p data-value="7">Test 7</p>
+        <p data-value="8">Test 8</p>
+        <p data-value="9">Test 9</p>
+        <p data-value="10">Test 10</p>
     </div>
+
+    <button type="button" onclick="roll()">click</button>
     <script>
         let color = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlueViolet', 'HotPink', 'DeepPink']
 
@@ -27,6 +29,8 @@
             options = null;
 
             contentTotal = null;
+            contentStyle = '';
+            rotation = 1024;
 
             constructor(id, options) {
                 if (id == null) return console.error("[WheelSpinner.js] missing 'id' parameter.");
@@ -35,13 +39,46 @@
                 this.id = id;
                 this.options = options;
 
-                this.validation();
-                this.injectStyle();
+                this.setDefault();
                 this.drawContent();
+                this.injectStyle();
             }
 
-            validation() {
-                if (this.options['size'] == null) return console.error("[WheelSpinner.js] 'options' parameter missing 'size' property.");
+            setDefault() {
+                if (this.options['size'] == null) this.options['size'] = 600;
+
+
+            }
+
+            drawContent() {
+                let element = document.getElementById(this.id);
+                let contentElements = [].slice.call(element.children);
+
+                this.contentTotal = contentElements.length;
+
+                if (this.contentTotal < 1) return;
+
+                element.innerHTML = '';
+                for (let i = 0; i < this.contentTotal; i++) {
+                    let content = document.createElement("div");
+
+                    let degrees = 360/this.contentTotal;
+                    let tangent = Math.tan((degrees /2) * Math.PI / 180)
+                    let base = (2 * (this.options['size']/2)) * tangent;
+                    let length = (this.options['size'] - base) / this.options['size'] * 100;
+
+                    content.appendChild(contentElements[i]);
+                    content.firstChild.style.transform = `translateY(-50px) rotate(${360 - ((360/this.contentTotal) * (i+1))}deg) `;
+                    element.appendChild(content);
+
+                    this.contentStyle += ` #${this.id}>:nth-child(${i+1}) {
+                                            clip-path: polygon(50% 100%, ${100 - length}% 0, ${(length)}% 0);
+                                            transform: rotate(${(360/this.contentTotal) * (i+1)}deg);
+                                            transform-origin: 50% 100%;
+                                            background-color: ${color[i]};
+                                        }
+                                        `;
+                }
             }
 
             injectStyle() {
@@ -53,6 +90,7 @@
                                         border-radius: 50%;
                                         overflow: hidden;
                                         position: relative;
+                                        transition: transform ease ${this.options['duration']}ms;
                                         height: ${this.options['size']}px;
                                         width: ${this.options['size']}px;
                                     }
@@ -68,46 +106,16 @@
                                         width: ${this.options['size']}px;
                                     }
                                     
-                                    `;
+                                    ` 
+                                    + this.contentStyle;
                 head.appendChild(style);
             }
 
-            drawContent() {
-                let element = document.getElementById(this.id);
-                let contentElements = [].slice.call(element.children);
-
-                this.contentTotal = contentElements.length;
-
-                if (this.contentTotal < 1) return;
-
-                element.innerHTML = '';
-                for (let i = 0; i < this.contentTotal; i++) {
-                    let content = document.createElement("div");
-
-                    var degrees = 360/this.contentTotal;
-                    var tangent = Math.tan((degrees /2) * Math.PI / 180)
-                    var base = (2 * (this.options['size']/2)) * tangent;
-                    var length = (this.options['size'] - base) / 10;
-
-                    let head = document.getElementsByTagName('head')[0];
-                    let style = document.createElement('style');
-
-                    style.innerHTML = ` #${this.id}>:nth-child(${i+1}) {
-                                            clip-path: polygon(50% 100%, ${100 - length}% 0, ${(length)}% 0);
-                                            transform: rotate(${(360/this.contentTotal) * (i+1)}deg);
-                                            transform-origin: 50% 100%;
-                                            background-color: ${color[i]};
-                                        }
-                                        `;
-                    head.appendChild(style);
-                    content.appendChild(contentElements[i]);
-                    content.firstChild.style.transform = `translateY(-50px) rotate(${360 - ((360/this.contentTotal) * (i+1))}deg) `;
-                    element.appendChild(content);
-                }
-
-            }
-
             spin(value) {
+                let rotate
+                this.rotation += 1024;
+
+                document.getElementById(this.id).style.transform = `rotate(${this.rotation}deg)`;
             }
         }
 
@@ -121,12 +129,15 @@
                 color: null,
                 size: 2,
             },
-            size: 500,
+            // size: 500,
+            duration: 4000,
         }
 
         let wheelSpinner = new WheelSpinner('wheelSpinner', options);
 
-        wheelSpinner.spin();
+        function roll() {
+            wheelSpinner.spin();
+        }
     </script>
 </body>
 </html>
