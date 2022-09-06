@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="spinner" data-spinner="spinner">
+        <p>Test 1</p>
+        <p>Test 2</p>
+        <p>Test 3</p>
+        <p>Test 4</p>
+        <p>Test 5</p>
+        <p>Test 6</p>
+        <p>Test 7</p>
+        <p>Test 8</p>
+        <p>Test 9</p>
+        <p>Test 10</p>
+    </div>
+    <script>
+        let spinner = document.querySelector('[data-spinner]');
+        
+        let content = spinner.children;
+
+        let value = [];
+
+        let color = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlueViolet', 'HotPink', 'DeepPink']
+        
+
+        spinner.style.position = 'relative';
+        spinner.style.borderRadius = '50%';
+        spinner.style.overflow = 'hidden';
+        spinner.style.border = '1px solid red';
+        spinner.style.height = '500px';
+        spinner.style.width = '500px';
+
+        if (content.length > 0) {
+            let contentTotal = content.length;
+
+            for (let i = 0; i < contentTotal; i++) {
+                value.push(content[i]);
+            }
+
+            spinner.innerHTML = '';
+
+            for (let i = 0; i < contentTotal; i++) {
+                var el = document.createElement("div");
+                el.style.height = `${(500/2)}px`;
+                el.style.width = '500px';
+                el.style.position = 'absolute';
+                el.style.display = 'flex';
+                el.style.justifyContent = 'center';
+                el.style.alignItems = 'center';
+                el.style.top = '0px';
+                el.style.left = '0px';
+                var height = 250;
+                var width = 500;
+
+                var degrees = 360/contentTotal;
+                var tangent = Math.tan((degrees /2) * Math.PI / 180)
+
+                var base = (2 * height) * tangent;
+                var length = (width - base) / 10;
+                el.style.clipPath = `polygon(50% 100%, ${100 - length}% 0, ${(length)}% 0)`; 
+                el.style.transform = `rotate(${(360/contentTotal) * (i+1)}deg)`;
+                el.style.transformOrigin = `50% 100%`;
+                el.style.backgroundColor = color[i];
+                el.appendChild(value[i]);
+                var child = el.firstChild;
+                child.style.transform = `translateY(-50px) rotate(${360 - ((360/contentTotal) * (i+1))}deg) `;
+                spinner.appendChild(el);
+            }
+        }
+
+
+    </script>
+</body>
+</html>
