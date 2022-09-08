@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="wheelSpinner">
+    <div id="spinWheel">
         <p id="10">Test 1</p>
         <p id="20">Test 2</p>
         <p id="30">Test 3</p>
@@ -24,11 +24,12 @@
     <script>
         let color = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlueViolet', 'HotPink', 'DeepPink']
 
-        class WheelSpinner{
+        class SpinWheel{
             id = null;
             defaultConfig = {
                 size: 500,
                 duration: 1000,
+                arrow: 'top',
             };
 
             sound = 'tick.mp3';
@@ -37,13 +38,13 @@
             rotation = 1024;
 
             constructor(id, config) {
-                // parameters validation
-                if (id == null) return console.error("[WheelSpinner.js] missing 'id' parameter.");
-                if (config == null) return console.error("[WheelSpinner.js] missing 'options' parameter.");
+                // Parameters validations.
+                if (id == null) return console.error("[SpinWheel.js] missing 'id' parameter.");
+                if (config == null) return console.error("[SpinWheel.js] missing 'options' parameter.");
 
                 this.id = id;
 
-                // assign 'config' values on 'this.defaultConfig'
+                // Assign 'config' values on 'this.defaultConfig'.
                 for (let key in config) {
                     if (typeof(config[key]) !== undefined && this.defaultConfig[key] !== undefined) {
                         console.log(this.defaultConfig[key])
@@ -51,6 +52,7 @@
                     }
                 }
 
+                // Draw content
                 this.drawContent();
                 this.injectStyle();
             }
@@ -67,6 +69,9 @@
                 if (this.contentTotal < 1) return;
 
                 element.innerHTML = '';
+
+                // Create arrow.
+
                 for (let i = 0; i < this.contentTotal; i++) {
                     let content = document.createElement("div");
 
@@ -155,10 +160,10 @@
             duration: 4000,
         }
 
-        let wheelSpinner = new WheelSpinner('wheelSpinner', config);
+        let spinWheel = new SpinWheel('spinWheel', config);
 
         function roll() {
-            wheelSpinner.spin();
+            spinWheel.spin();
         }
     </script>
 </body>
