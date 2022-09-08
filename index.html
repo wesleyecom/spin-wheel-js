@@ -8,16 +8,16 @@
 </head>
 <body>
     <div id="wheelSpinner">
-        <p data-value="1">Test 1</p>
-        <p data-value="2">Test 2</p>
-        <p data-value="3">Test 3</p>
-        <p data-value="4">Test 4</p>
-        <p data-value="5">Test 5</p>
-        <p data-value="6">Test 6</p>
-        <p data-value="7">Test 7</p>
-        <p data-value="8">Test 8</p>
-        <p data-value="9">Test 9</p>
-        <p data-value="10">Test 10</p>
+        <p id="10">Test 1</p>
+        <p id="20">Test 2</p>
+        <p id="30">Test 3</p>
+        <p id="40">Test 4</p>
+        <p id="50">Test 5</p>
+        <p id="60">Test 6</p>
+        <p id="70">Test 7</p>
+        <p id="80">Test 8</p>
+        <p id="90">Test 9</p>
+        <p id="100">Test 10</p>
     </div>
 
     <button type="button" onclick="roll()">click</button>
@@ -26,30 +26,38 @@
 
         class WheelSpinner{
             id = null;
-            options = null;
+            defaultConfig = {
+                size: 500,
+                duration: 1000,
+            };
 
+            sound = 'tick.mp3';
             contentTotal = null;
             contentStyle = '';
             rotation = 1024;
 
-            constructor(id, options) {
+            constructor(id, config) {
+                // parameters validation
                 if (id == null) return console.error("[WheelSpinner.js] missing 'id' parameter.");
-                if (options == null) return console.error("[WheelSpinner.js] missing 'options' parameter.");
+                if (config == null) return console.error("[WheelSpinner.js] missing 'options' parameter.");
 
                 this.id = id;
-                this.options = options;
 
-                this.setDefault();
+                // assign 'config' values on 'this.defaultConfig'
+                for (let key in config) {
+                    if (typeof(config[key]) !== undefined && this.defaultConfig[key] !== undefined) {
+                        console.log(this.defaultConfig[key])
+                        this.defaultConfig[key] = config[key];
+                    }
+                }
+
                 this.drawContent();
                 this.injectStyle();
             }
 
-            setDefault() {
-                if (this.options['size'] == null) this.options['size'] = 600;
-
-
-            }
-
+            /** 
+             * 
+             */
             drawContent() {
                 let element = document.getElementById(this.id);
                 let contentElements = [].slice.call(element.children);
@@ -64,11 +72,12 @@
 
                     let degrees = 360/this.contentTotal;
                     let tangent = Math.tan((degrees /2) * Math.PI / 180)
-                    let base = (2 * (this.options['size']/2)) * tangent;
-                    let length = (this.options['size'] - base) / this.options['size'] * 100;
+                    let base = (2 * (this.defaultConfig['size']/2)) * tangent;
+                    let length = (this.defaultConfig['size'] - base) / this.defaultConfig['size'] * 100;
 
                     content.appendChild(contentElements[i]);
-                    content.firstChild.style.transform = `translateY(-50px) rotate(${360 - ((360/this.contentTotal) * (i+1))}deg) `;
+                    // content.firstChild.style.transform = `translateY(-50px) rotate(${360 - ((360/this.contentTotal) * (i+1))}deg) `;
+                    content.firstChild.style.transform = `rotate(-90deg) `;
                     element.appendChild(content);
 
                     this.contentStyle += ` #${this.id}>:nth-child(${i+1}) {
@@ -90,9 +99,9 @@
                                         border-radius: 50%;
                                         overflow: hidden;
                                         position: relative;
-                                        transition: transform ease ${this.options['duration']}ms;
-                                        height: ${this.options['size']}px;
-                                        width: ${this.options['size']}px;
+                                        transition: transform ease ${this.defaultConfig['duration']}ms;
+                                        height: ${this.defaultConfig['size']}px;
+                                        width: ${this.defaultConfig['size']}px;
                                     }
 
                                     #${this.id} * {
@@ -102,8 +111,8 @@
                                         position: absolute;
                                         top: 0px;
                                         left: 0px;
-                                        height: ${this.options['size']/2}px;
-                                        width: ${this.options['size']}px;
+                                        height: ${this.defaultConfig['size']/2}px;
+                                        width: ${this.defaultConfig['size']}px;
                                     }
                                     
                                     ` 
@@ -112,14 +121,27 @@
             }
 
             spin(value) {
-                let rotate
-                this.rotation += 1024;
+                let rotate = 4;
+                let degree = 360;
+                this.rotation += rotate*degree;
+                let soundAmount = rotate*this.contentTotal;
 
+                let timer = this.defaultConfig['duration']/soundAmount;
+                let audio = new Audio(this.sound);
+
+                function playSound(){
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.play();
+                }
+
+                let interval = setInterval(playSound, timer);
+                let timeout = setTimeout(() => {clearInterval(interval)}, this.defaultConfig['duration']);
                 document.getElementById(this.id).style.transform = `rotate(${this.rotation}deg)`;
             }
         }
 
-        let options = {
+        let config = {
             audio: false,
             background: {
                 color: null,
@@ -129,11 +151,11 @@
                 color: null,
                 size: 2,
             },
-            // size: 500,
+            size: 600,
             duration: 4000,
         }
 
-        let wheelSpinner = new WheelSpinner('wheelSpinner', options);
+        let wheelSpinner = new WheelSpinner('wheelSpinner', config);
 
         function roll() {
             wheelSpinner.spin();
