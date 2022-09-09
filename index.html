@@ -29,9 +29,11 @@
             defaultConfig = {
                 size: 500,
                 duration: 1000,
-                arrow: 'top',
+                arrowPosition: 'top',
             };
 
+            arrowElement = null;
+            arrowStyle  = '';
             sound = 'tick.mp3';
             contentTotal = null;
             contentStyle = '';
@@ -40,14 +42,13 @@
             constructor(id, config) {
                 // Parameters validations.
                 if (id == null) return console.error("[SpinWheel.js] missing 'id' parameter.");
-                if (config == null) return console.error("[SpinWheel.js] missing 'options' parameter.");
+                if (config == null) return console.error("[SpinWheel.js] missing 'config' parameter.");
 
                 this.id = id;
 
                 // Assign 'config' values on 'this.defaultConfig'.
                 for (let key in config) {
                     if (typeof(config[key]) !== undefined && this.defaultConfig[key] !== undefined) {
-                        console.log(this.defaultConfig[key])
                         this.defaultConfig[key] = config[key];
                     }
                 }
@@ -70,27 +71,62 @@
 
                 element.innerHTML = '';
 
+                let drawContent = true;
                 // Create arrow.
+                // this.arrowElement = document.createElement("div");
+                // this.arrowElement.classList.add(`spin-wheel-arrow-${this.defaultConfig['arrowPosition']}`);
+                // element.appendChild(this.arrowElement );
+
+                // switch (this.defaultConfig['arrowPosition']) {
+                //     case 'bottom':
+                //         break;
+                //     case 'left':
+                //         break;
+                //     case 'right':
+                //         break;
+                //     case 'top':
+                //         // this.arrowStyle = ` #${this.id} .spin-wheel-arrow-${this.arrowPosition} {
+                //         //                         height:
+                //         //                     }`;
+                //         break;
+                //     default:
+                //         console.warn("[SpinWheel.js] 'arrowPosition' properties in config have invalid value.")
+                //         break;
+                // }
+
+                let degrees = 360/this.contentTotal;
+                let tangent = Math.tan((degrees /2) * Math.PI / 180)
+                let base = (2 * (this.defaultConfig['size']/2)) * tangent;
+                let length = (this.defaultConfig['size'] - base) / this.defaultConfig['size'] * 100;
+
+                this.contentStyle +=    `#${this.id} div {
+                                            display: flex;
+                                            justify-content: center;
+                                            align-items: center;
+                                            position: absolute;
+                                            height: ${this.defaultConfig['size']/2}px;
+                                            width: ${base}px;
+                                            left: ${length/2}%;
+                                        }`; 
 
                 for (let i = 0; i < this.contentTotal; i++) {
                     let content = document.createElement("div");
 
-                    let degrees = 360/this.contentTotal;
-                    let tangent = Math.tan((degrees /2) * Math.PI / 180)
-                    let base = (2 * (this.defaultConfig['size']/2)) * tangent;
-                    let length = (this.defaultConfig['size'] - base) / this.defaultConfig['size'] * 100;
 
                     content.appendChild(contentElements[i]);
+
+                    //Text straight
                     // content.firstChild.style.transform = `translateY(-50px) rotate(${360 - ((360/this.contentTotal) * (i+1))}deg) `;
+
                     content.firstChild.style.transform = `rotate(-90deg) `;
                     element.appendChild(content);
 
-                    this.contentStyle += ` #${this.id}>:nth-child(${i+1}) {
-                                            clip-path: polygon(50% 100%, ${100 - length}% 0, ${(length)}% 0);
-                                            transform: rotate(${(360/this.contentTotal) * (i+1)}deg);
-                                            transform-origin: 50% 100%;
-                                            background-color: ${color[i]};
-                                        }
+                    this.contentStyle += `  #${this.id}>:nth-child(${i+1}) {
+                                                clip-path: polygon(50% 100%, 100% 0, 0 0);
+                                                transform: rotate(${(360/this.contentTotal) * (i+1)}deg);
+                                                transform-origin: 50% 100%;
+                                                background-color: ${color[i]};
+                                            }
                                         `;
                 }
             }
@@ -107,21 +143,31 @@
                                         transition: transform ease ${this.defaultConfig['duration']}ms;
                                         height: ${this.defaultConfig['size']}px;
                                         width: ${this.defaultConfig['size']}px;
-                                    }
-
-                                    #${this.id} * {
-                                        display: flex;
-                                        justify-content: center;
-                                        align-items: center;
-                                        position: absolute;
-                                        top: 0px;
-                                        left: 0px;
-                                        height: ${this.defaultConfig['size']/2}px;
-                                        width: ${this.defaultConfig['size']}px;
-                                    }
-                                    
-                                    ` 
+                                    }` 
                                     + this.contentStyle;
+
+                // style.innerHTML = ` #${this.id} {
+                //                         border: 1px solid blue;
+                //                         border-radius: 50%;
+                //                         overflow: hidden;
+                //                         position: relative;
+                //                         transition: transform ease ${this.defaultConfig['duration']}ms;
+                //                         height: ${this.defaultConfig['size']}px;
+                //                         width: ${this.defaultConfig['size']}px;
+                //                     }
+
+                //                     #${this.id} * {
+                //                         display: flex;
+                //                         justify-content: center;
+                //                         align-items: center;
+                //                         position: absolute;
+                //                         top: 0px;
+                //                         left: 0px;
+                //                         height: ${this.defaultConfig['size']/2}px;
+                //                         width: ${this.defaultConfig['size']}px;
+                //                     }
+                //                     ` 
+                //                     + this.contentStyle;
                 head.appendChild(style);
             }
 
@@ -158,6 +204,7 @@
             },
             size: 600,
             duration: 4000,
+            arrowPosition: 'jojo'
         }
 
         let spinWheel = new SpinWheel('spinWheel', config);
